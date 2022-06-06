@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 import report.report as rep
 
 app = Flask(__name__)
-path_to_files = 'F:\\Python\\FlaskReport\\data\\'
+path_to_files = 'data\\'
 racers = rep.build_report(path_to_files)
 
 
@@ -36,12 +36,12 @@ def driver_info(driver):
                                    title=f'{driver} info',
                                    racer=racer)
     else:
-        return 'There is no racer with this abb'
+        return render_template('driver_not_found.html',
+                               title='Driver not found')
 
 
 def get_order(order):
     return order == 'desc'
-
 
 
 if __name__ == '__main__':
