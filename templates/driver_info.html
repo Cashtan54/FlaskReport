@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    Name: {{ racer.name }} <br>
+    Abbreviation: {{ racer.abb }} <br>
+    Team: {{ racer.team }} <br>
+    Best lap start time: {{ racer.start_time }} <br>
+    Best lap end time: {{ racer.end_time }} <br>
+    Best lap: {{ racer.best_lap }}
+{% endblock %}

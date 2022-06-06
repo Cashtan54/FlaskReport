@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Report{% endblock %}
+
+{% block content %}
+    <ol>
+        {% for racer in racers %}
+            <li>{{ racer.name }} {{ racer.best_lap if racer.best_lap else "Invalid data" }}</li>
+        {% endfor %}
+    </ol>
+{% endblock %}
