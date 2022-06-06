@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request
 import report.report as rep
+import os
 
 app = Flask(__name__)
-path_to_files = 'data\\'
+path_to_files = os.path.join(os.path.dirname(__file__), './data')
 racers = rep.build_report(path_to_files)
 
 
