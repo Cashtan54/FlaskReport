@@ -100,7 +100,6 @@ def get_xml_report():
 def get_xml_drivers():
     root = ElementTree.Element('racers')
     for racer, data in rep.parse_abbreviations(path_to_files).items():
-        print(racer, data)
         racer_abb = ElementTree.SubElement(root, 'racer_id')
         racer_abb.text = racer
         racer_name = ElementTree.SubElement(racer_abb, 'name')
@@ -171,6 +170,5 @@ class DriversApi(Resource):
 
 api.add_resource(ReportApi, '/report/')
 api.add_resource(DriversApi, '/report/drivers/')
-
 if __name__ == '__main__':
     app.run(debug=True)
