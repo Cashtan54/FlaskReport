@@ -75,8 +75,8 @@ def get_json_driver_by_id(driver_id):
             racer_data[racer.abb] = dict()
             racer_data[racer.abb]['name'] = racer.name
             racer_data[racer.abb]['team'] = racer.team
-            racer_data[racer.abb]['start_time'] = racer.start_time
-            racer_data[racer.abb]['end_time'] = racer.end_time
+            racer_data[racer.abb]['start_time'] = racer.start_time.strftime('%H.%M.%S.%f')[:-3]
+            racer_data[racer.abb]['end_time'] = racer.end_time.strftime('%H.%M.%S.%f')[:-3]
             racer_data[racer.abb]['best_lap'] = racer.best_lap
             return jsonify(racer_data)
     else:
@@ -122,9 +122,9 @@ def get_xml_driver_by_id(driver_id):
             racer_team = ElementTree.SubElement(racer_abb, 'team')
             racer_team.text = racer.team
             racer_start_time = ElementTree.SubElement(racer_abb, 'start_time')
-            racer_start_time.text = racer.start_time.strftime('%M.%S.%f')[:-3]
+            racer_start_time.text = racer.start_time.strftime('%H.%M.%S.%f')[:-3]
             racer_end_time = ElementTree.SubElement(racer_abb, 'end_time')
-            racer_end_time.text = racer.end_time.strftime('%M.%S.%f')[:-3]
+            racer_end_time.text = racer.end_time.strftime('%H.%M.%S.%f')[:-3]
             racer_best_lap = ElementTree.SubElement(racer_abb, 'best_lap')
             racer_best_lap.text = racer.best_lap
             tree = ElementTree.tostring(root)
@@ -140,6 +140,9 @@ def get_xml_driver_by_id(driver_id):
 
 class ReportApi(Resource):
     def get(self):
+        """
+        file: swagger/report.yml
+        """
         format = request.args.get('format')
         if format is None or format == 'json':
             return get_json_report()
@@ -149,6 +152,9 @@ class ReportApi(Resource):
 
 class DriversApi(Resource):
     def get(self):
+        """
+        file: swagger/drivers.yml
+        """
         format = request.args.get('format')
         driver_id = request.args.get('driver_id')
         if driver_id:

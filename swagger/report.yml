@@ -1,0 +1,10 @@
+parameters:
+  - name: format
+    in: query
+    type: string
+    enum: ['json', 'xml']
+    required: false
+    default: json
+responses:
+  200:
+    description: JSON or XML report about race

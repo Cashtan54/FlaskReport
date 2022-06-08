@@ -1,0 +1,18 @@
+parameters:
+  - name: format
+    in: query
+    type: string
+    enum: ['json', 'xml']
+    required: false
+    default: json
+  - name: driver_id
+    in: query
+    type: string
+    enum: ['SVF', 'KRF', 'DRR', 'LHM', 'VBM', 'EOF', 'FAM', 'CSR', 'SPF',
+           'PGS', 'NHR', 'SVM', 'SSW', 'CLS', 'RGH', 'BHS', 'MES', 'LSW', 'KMH']
+    required: false
+    default: null
+responses:
+  200:
+    description: JSON or XML report about racers
+
