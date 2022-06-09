@@ -8,8 +8,6 @@ parameters:
   - name: driver_id
     in: query
     type: string
-    enum: ['SVF', 'KRF', 'DRR', 'LHM', 'VBM', 'EOF', 'FAM', 'CSR', 'SPF',
-           'PGS', 'NHR', 'SVM', 'SSW', 'CLS', 'RGH', 'BHS', 'MES', 'LSW', 'KMH']
     required: false
     default: null
 responses:

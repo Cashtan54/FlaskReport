@@ -68,31 +68,28 @@ def test_get_json_driver_by_id(app, client):
     assert resp2.status_code == 200
     assert b'{"SVF":{"best_lap":"1:04.415","end_time":"12.04.03.332",' \
            b'"name":"Sebastian Vettel","start_time":"12.02.58.917","team":"FERRARI"}}\n' == resp2.data
-    assert wrongresp.status_code == 200
-    assert b'{"123":"There is no racer with this abb"}\n' == wrongresp.data
+    assert wrongresp.status_code == 404
+    assert b"{'errors': 'No data found', 'status_code': 404}" == wrongresp.data
 
 
 def test_get_xml_report(app, client):
     resp = client.get('api/v1/report/?format=xml')
     assert resp.status_code == 200
-    assert b'<racers><racer_place>1<name>Sebastian Vettel</name>' \
-           b'<best_lap>1:04.415</best_lap></racer_place><racer_place>' in resp.data
+    assert b'<racers><1><best_lap>1:04.415</best_lap><name>Sebastian Vettel</name></1>' in resp.data
 
 
 def test_get_xml_drivers(app, client):
     resp = client.get('api/v1/report/drivers/?format=xml')
     assert resp.status_code == 200
-    assert b'<racers><racer_id>DRR<name>Daniel Ricciardo</name>' \
-           b'<team>RED BULL RACING TAG HEUER</team></racer_id>' in resp.data
+    assert b'<racers><BHS><name>Brendon Hartley</name><team>SCUDERIA TORO ROSSO HONDA</team></BHS>' in resp.data
 
 
 def test_get_xml_driver_by_id(app, client):
     resp = client.get('api/v1/report/drivers/?format=xml&driver_id=SVF')
     wrongresp = client.get('api/v1/report/drivers/?format=xml&driver_id=123')
     assert resp.status_code == 200
-    assert b'<racer><racer_abb>SVF<name>Sebastian Vettel</name>' \
-           b'<team>FERRARI</team><start_time>12.02.58.917</start_time>' \
-           b'<end_time>12.04.03.332</end_time><best_lap>1:04.415</best_lap></racer_abb></racer>' == resp.data
-    assert wrongresp.status_code == 200
-    assert b'<racer><racer_abb>123<response>' \
-           b'There is no racer with this abb</response></racer_abb></racer>' == wrongresp.data
+    assert b'<SVF><best_lap>1:04.415</best_lap><end_time>12.04.03.332</end_time>' \
+           b'<name>Sebastian Vettel</name><start_time>12.02.58.917</start_time>' \
+           b'<team>FERRARI</team></SVF>' == resp.data
+    assert wrongresp.status_code == 404
+    assert b"{'errors': 'No data found', 'status_code': 404}" == wrongresp.data
