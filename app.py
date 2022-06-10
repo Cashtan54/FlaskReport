@@ -84,11 +84,8 @@ def get_driver_by_id(driver_id):
 
 
 def handler_report(format):
-    if format == 'json':
-        return jsonify(get_report())
-    if format == 'xml':
-        xmlreport = dict2xml(get_report(), newlines=False)
-        return Response(xmlreport, content_type='application/xml')
+    data = get_report()
+    return get_representation(data, format)
 
 
 def handler_drivers(driver_id, format):
