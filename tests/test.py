@@ -3,6 +3,8 @@ import pytest
 import app as flaskapp
 import os
 import tempfile
+from db import fill_db
+from peewee import SqliteDatabase
 
 
 @pytest.fixture
@@ -11,12 +13,10 @@ def app():
     return app
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def client():
-    db_fd, flaskapp.app.config['DATABASE'] = tempfile.mkstemp()
+    db_fd, flaskapp.app.config['DATABASE'] = tempfile.mkstemp(suffix='.db')
     flaskapp.app.config['TESTING'] = True
-    with flaskapp.app.app_context():
-        flaskapp.fill_db()
     with flaskapp.app.test_client() as client:
         yield client
 

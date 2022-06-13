@@ -1,35 +1,9 @@
-from peewee import *
 import report.report as rep
 import os
+from models import *
+
 
 path_to_files = os.path.join(os.path.dirname(__file__), './data')
-
-db = SqliteDatabase('racer.db')
-
-
-class BaseModel(Model):
-
-    class Meta:
-        database = db
-
-
-class Racer(BaseModel):
-    driver_id = CharField()
-    name = CharField()
-    team = CharField()
-
-    class Meta:
-        table_name = 'racer_data'
-
-
-class RacerTime(BaseModel):
-    racer = ForeignKeyField(Racer, column_name='driver_id')
-    start_time = DateTimeField()
-    end_time = DateTimeField()
-    best_lap = CharField(null=True)
-
-    class Meta:
-        table_name = 'racer_time'
 
 
 def fill_db():

@@ -1,22 +1,23 @@
 from flask import Flask, render_template, request, jsonify, Response
 from flask_restful import Resource, Api
 from flasgger import Swagger
-import report.report as rep
-import os
 from dict2xml import dict2xml
-from peewee import *
-from db_script import fill_db, Racer, RacerTime
+from db import *
 
 app = Flask(__name__)
 api = Api(app, '/api/v1')
 swagger = Swagger(app)
 path_to_files = os.path.join(os.path.dirname(__file__), './data')
 racers = rep.build_report(path_to_files)
-db = SqliteDatabase('racer.db')
+app.config['DATABASE'] = 'racer.db'
 
 
 @app.before_request
 def _db_connect():
+    database_name = app.config['DATABASE']
+    db.init(database_name, pragmas={'foreign_keys': 1})
+    if database_name != 'racer.db':
+        fill_db()
     db.connect()
 
 
@@ -150,6 +151,6 @@ class DriversApi(Resource):
 
 api.add_resource(ReportApi, '/report/')
 api.add_resource(DriversApi, '/report/drivers/')
+
 if __name__ == '__main__':
-    fill_db()
     app.run(debug=True)
