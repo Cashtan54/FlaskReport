@@ -4,8 +4,8 @@
 
 {% block content %}
     <ul>
-    {% for racer in racers|sort(reverse=reverse_order, attribute="name") %}
-        <li>{{ racer.name }} <a href="?driver_id={{ racer.abb }}">{{ racer.abb }}</a></li>
+    {% for racer in racers %}
+        <li>{{ racer.name }} <a href="?driver_id={{ racer.driver_id }}">{{ racer.driver_id }}</a></li>
     {% endfor%}
     </ul>
 {% endblock%}

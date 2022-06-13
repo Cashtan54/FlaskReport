@@ -5,7 +5,7 @@
 {% block content %}
     <ol>
         {% for racer in racers %}
-            <li>{{ racer.name }} {{ racer.best_lap if racer.best_lap else "Invalid data" }}</li>
+            <li>{{ racer.racer.name }} {{ racer.best_lap if racer.best_lap else "Invalid data" }}</li>
         {% endfor %}
     </ol>
 {% endblock %}

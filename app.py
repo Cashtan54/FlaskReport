@@ -3,84 +3,105 @@ from flask_restful import Resource, Api
 from flasgger import Swagger
 import report.report as rep
 import os
-from xml.etree import ElementTree
-import json
-from datetime import datetime
 from dict2xml import dict2xml
+from peewee import *
+from db_script import Racer, RacerTime
 
 app = Flask(__name__)
 api = Api(app, '/api/v1')
 swagger = Swagger(app)
 path_to_files = os.path.join(os.path.dirname(__file__), './data')
 racers = rep.build_report(path_to_files)
+db = SqliteDatabase('racer.db')
+
+
+@app.before_request
+def _db_connect():
+    db.connect()
+
+
+@app.teardown_request
+def _db_close(exc):
+    if not db.is_closed():
+        db.close()
 
 
 @app.route('/report/')
 @app.route('/report')
 def report():
-    order = request.args.get('order')
-    return render_template('report.html',
-                           racers=sorted(racers,
-                                         key=lambda racer: racer.best_lap if racer.best_lap else racer.name,
-                                         reverse=get_order(order)))
+    order = request.args.get('order', default='asc')
+    if order == 'asc':
+        racers = RacerTime.select(Racer.name, RacerTime.best_lap).join(Racer).order_by(str(RacerTime.best_lap))
+        return render_template('report.html',
+                               racers=racers)
+    elif order == 'desc':
+        racers = RacerTime.select(Racer.name, RacerTime.best_lap).join(Racer).order_by(RacerTime.best_lap.desc())
+        return render_template('report.html',
+                               racers=racers)
 
 
 @app.route('/report/drivers/')
 def drivers():
     driver = request.args.get('driver_id')
-    order = request.args.get('order')
+    order = request.args.get('order', default='asc')
     if driver:
         return driver_info(driver)
     else:
+        if order == 'asc':
+            racers = Racer.select().order_by(Racer.name)
+        elif order == 'desc':
+            racers = Racer.select().order_by(Racer.name.desc())
         return render_template('drivers.html',
                                racers=racers,
-                               title='Drivers',
-                               reverse_order=get_order(order))
+                               title='Drivers')
 
 
 def driver_info(driver):
-    for racer in racers:
-        if racer.abb == driver:
-            return render_template('driver_info.html',
-                                   title=f'{driver} info',
-                                   racer=racer)
+    racer = RacerTime.select(RacerTime, Racer).join(Racer).where(Racer.driver_id == driver).get()
+    if racer:
+        return render_template('driver_info.html',
+                               title=f'{driver} info',
+                               racer=racer)
     else:
         return render_template('driver_not_found.html',
                                title='Driver not found')
 
 
-def get_order(order):
-    return order == 'desc'
-
-
+# API part
 def get_report():
+    racers = RacerTime.select(Racer.name, RacerTime.best_lap).join(Racer)
     racers_dict = dict()
     racers_dict['racers'] = dict()
     for place, racer in enumerate(racers, 1):
         racers_dict['racers'][place] = {
-            'name': racer.name,
-            'best_lap': racer.best_lap
+            'name': racer.racer.name,
+            'best_lap': racer.best_lap,
         }
     return racers_dict
 
 
 def get_drivers():
-    racers_dict = {'racers': rep.parse_abbreviations(path_to_files)}
+    racers_dict = dict()
+    racers_dict['racers'] = dict()
+    for racer in Racer.select().order_by('driver_id'):
+        racers_dict['racers'][racer.driver_id] = {
+            'name': racer.name,
+            'team': racer.team,
+        }
     return racers_dict
 
 
 def get_driver_by_id(driver_id):
+    racer = RacerTime.select(RacerTime, Racer).join(Racer).where(Racer.driver_id == driver_id).get()
     racer_data = dict()
-    for racer in racers:
-        if racer.abb == driver_id:
-            racer_data[racer.abb] = {
-                'name': racer.name,
-                'team': racer.team,
-                'start_time': racer.start_time.strftime('%H.%M.%S.%f')[:-3],
-                'end_time': racer.end_time.strftime('%H.%M.%S.%f')[:-3],
-                'best_lap': racer.best_lap
-            }
-            return racer_data
+    racer_data[racer.racer.driver_id] = {
+        'name': racer.racer.name,
+        'team': racer.racer.team,
+        'start_time': racer.start_time.strftime('%H.%M.%S.%f')[:-3],
+        'end_time': racer.end_time.strftime('%H.%M.%S.%f')[:-3],
+        'best_lap': racer.best_lap,
+    }
+    return racer_data
 
 
 def handler_report(format):
@@ -105,7 +126,6 @@ def get_representation(data, format):
     else:
         notfound = str({'errors': 'No data found', 'status_code': 404})
         return Response(notfound, status=404)
-
 
 
 class ReportApi(Resource):
