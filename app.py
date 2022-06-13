@@ -5,7 +5,7 @@ import report.report as rep
 import os
 from dict2xml import dict2xml
 from peewee import *
-from db_script import Racer, RacerTime
+from db_script import fill_db, Racer, RacerTime
 
 app = Flask(__name__)
 api = Api(app, '/api/v1')
@@ -57,7 +57,7 @@ def drivers():
 
 
 def driver_info(driver):
-    racer = RacerTime.select(RacerTime, Racer).join(Racer).where(Racer.driver_id == driver).get()
+    racer = RacerTime.select(RacerTime, Racer).join(Racer).where(Racer.driver_id == driver).get_or_none()
     if racer:
         return render_template('driver_info.html',
                                title=f'{driver} info',
@@ -92,16 +92,17 @@ def get_drivers():
 
 
 def get_driver_by_id(driver_id):
-    racer = RacerTime.select(RacerTime, Racer).join(Racer).where(Racer.driver_id == driver_id).get()
-    racer_data = dict()
-    racer_data[racer.racer.driver_id] = {
-        'name': racer.racer.name,
-        'team': racer.racer.team,
-        'start_time': racer.start_time.strftime('%H.%M.%S.%f')[:-3],
-        'end_time': racer.end_time.strftime('%H.%M.%S.%f')[:-3],
-        'best_lap': racer.best_lap,
-    }
-    return racer_data
+    racer = RacerTime.select(RacerTime, Racer).join(Racer).where(Racer.driver_id == driver_id).get_or_none()
+    if racer:
+        racer_data = dict()
+        racer_data[racer.racer.driver_id] = {
+            'name': racer.racer.name,
+            'team': racer.racer.team,
+            'start_time': racer.start_time.strftime('%H.%M.%S.%f')[:-3],
+            'end_time': racer.end_time.strftime('%H.%M.%S.%f')[:-3],
+            'best_lap': racer.best_lap,
+        }
+        return racer_data
 
 
 def handler_report(format):
@@ -150,4 +151,5 @@ class DriversApi(Resource):
 api.add_resource(ReportApi, '/report/')
 api.add_resource(DriversApi, '/report/drivers/')
 if __name__ == '__main__':
+    fill_db()
     app.run(debug=True)
