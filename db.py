@@ -6,9 +6,9 @@ from models import *
 path_to_files = os.path.join(os.path.dirname(__file__), './data')
 
 
-def fill_db():
+def fill_db(database):
+    db.init(database)
     db.connect()
-    db.drop_tables([Racer, RacerTime])
     db.create_tables([Racer, RacerTime])
     for racer in rep.build_report(path_to_files):
         racer_inst = Racer(
@@ -27,4 +27,4 @@ def fill_db():
 
 
 if __name__ == '__main__':
-    fill_db()
+    fill_db('racer.db')

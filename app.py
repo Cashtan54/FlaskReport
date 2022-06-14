@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, Response
+from flask import Flask, render_template, request, jsonify, Response, g
 from flask_restful import Resource, Api
 from flasgger import Swagger
 from dict2xml import dict2xml
@@ -8,22 +8,20 @@ app = Flask(__name__)
 api = Api(app, '/api/v1')
 swagger = Swagger(app)
 path_to_files = os.path.join(os.path.dirname(__file__), './data')
-racers = rep.build_report(path_to_files)
 app.config['DATABASE'] = 'racer.db'
 
 
-@app.before_request
+@app.before_first_request
 def _db_connect():
     database_name = app.config['DATABASE']
     db.init(database_name, pragmas={'foreign_keys': 1})
-    if database_name != 'racer.db':
-        fill_db()
     db.connect()
 
 
-@app.teardown_request
-def _db_close(exc):
-    if not db.is_closed():
+@app.teardown_appcontext
+def teardown_db(e):
+    db = g.pop('db', None)
+    if db is not None:
         db.close()
 
 
